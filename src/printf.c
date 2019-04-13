@@ -16,34 +16,16 @@ char *ft_search(const char *str, char*search)
 	return(0);
 }
 
-void parse(conversion_table *argpart, const char *format)//use error int to check if valid
-{
-	int i;
-	int len;
-
-	i = 0;
-	len = ft_strlen(format);
-	argpart->conversions = (char *)malloc(sizeof(char) * len + 1);
-
-	while (*format && !ft_strchr(SPECI, *format))
-	{
-		argpart->conversions[i] = *format;
-		format++;
-		i++;
-	}
-	argpart->conversions[i] = *format;
-	argpart->conversions[i + 1] = '\0';
-
-	if (ft_strchr(SPECI, *format))
-		argpart->specifier = *format; //else can check valid specifier
-}
-
 int valid_conversion(conversion_table argpart, const char *format)
 {
 // if (argpart.error)
 // 	return(0);
 if (!ft_search(argpart.conversions, SPECI))
+{
+	ft_putstr("invalid conversions");
 	return(0);
+}
+// else if valid chars
 // else if (incompatable_conversions)
 // 	return(0);
 return(1);
@@ -64,10 +46,24 @@ int ft_putbasic(const char *format)
 	return(str_len);
 }
 
-void ft_printf(const char *format, ...)
+void initalize(conversion_table *argpart)
 {
+	argpart->conversions = 0;
+	argpart->specifier = 0;
+	argpart->flags = 0;
+	argpart->error = 0;
+	argpart->conlen = 0;
+	argpart->width = 0;
+	argpart->precision = 0;
+}
+
+int ft_printf(const char *format, ...)
+{
+	int place;
+	place = 0;
 	va_list list;
 	conversion_table argpart;
+	initalize(&argpart);
 	va_start(list, format);
 
 	va_end(list);
@@ -76,19 +72,17 @@ void ft_printf(const char *format, ...)
 		if(*format == '%')
 		{
 			format++;
-			parse(&argpart, format);
+			place = parse(&argpart, format);
 			if (valid_conversion(argpart, format))
 			{
-				ft_putstr("convers = |");
-				ft_putstr(argpart.conversions);
-				ft_putchar('|');
 				// convert(&argpart, format);
-				// print();
+				call_handler(list, &argpart);
 				// initial_and_free_lists();
-				format = ft_search(format, SPECI) ? ft_search(format, SPECI) + 1 : ft_strchr(format, '\n');
+				format = place + format; // format = ft_search(format, SPECI) ? ft_search(format, SPECI) + 1 : ft_strchr(format, '\n');
 			}
 		}
 		else
 			format = format + (ft_putbasic(format));
 	}
+	return(0);
 }
