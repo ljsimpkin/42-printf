@@ -8,7 +8,7 @@ int handle_s(va_list list, conversion_table *argpart)
 	len = 0;
 	str = va_arg(list, char *);
 	len = dup_put_char(ft_strlen(str), argpart->width, ' ') + ft_strlen(str);
-	ft_putstr(str);
+	ft_putstr(str); //faster using the write function and len?
 	return(len);
 }
 
@@ -32,42 +32,22 @@ int handle_c(va_list list, conversion_table *argpart)
 	return(len);
 }
 
-int handle_d(va_list list, conversion_table *argpart)
+int handle_dd(va_list list, conversion_table *argpart)
 {
-	int len;
-	int nb;
-	int nve;
-	int pve;
-	int space;
-	size_t digilen;
-	int nveflag;
+	int d = va_arg(list, int);
+	char *convert = ft_strnew(ft_digilen(d));
+	convert = strcpy(convert, ft_itoa(positive(d))); //fix ft_strcpy
+	char *padding = ft_handle_width(d, convert, argpart);
+	handle_zeroes(padding, &convert, argpart);
+	handle_sign(d, &convert, argpart);
 
-	len = 0;
-	nb = va_arg(list, int);
-	digilen = ft_digilen(nb);
-	nve = ((nb < 0) ? 1 : 0);
-	space = (ft_strchr(argpart->flags, ' ')) ? 1 : 0;
-	pve = (ft_strchr(argpart->flags, '+') && nb > 0) ? 1 : 0;
-	nveflag = (ft_strchr(argpart->flags, '-') && nb > 0) ? 1 : 0;
+	if (ft_strchr(argpart->flags, '-'))
+		convert = ft_strjoin(convert, padding);
+	else
+		convert = ft_strjoin(padding, convert);
 
-		if (nve)
-			ft_putchar('-');
-		if (pve)
-			ft_putchar('+');
-		else if (space)
-			ft_putchar(' ');
-		if (!nveflag)
-			len = len + dup_put_char2(argpart->width - argpart->precision - digilen - nve - pve - space, ' ') + 1;
-		len = dup_put_char2(argpart->precision - digilen, '0') + 1;
-		if (nve)
-			ft_putnbr(nb * -1);
-		else
-			ft_putnbr(nb);
-		if (nveflag)
-			len = len + dup_put_char2(argpart->width - argpart->precision - digilen - nve - pve - space, ' ') + 1;
-		// printf("width %zu precision %zu digilen %zu\n", argpart->width, argpart->precision , digilen);
-
-	return(len);
+ 	write(1, convert, ft_strlen(convert));
+	return(0);
 }
 
 int handle_o(va_list list, conversion_table *argpart)
@@ -111,8 +91,8 @@ int call_handler(va_list list, conversion_table *argpart)
 	int (*func[11])(va_list, conversion_table*);
 	func[0] = handle_c;
 	func[1] = handle_s;
-	func[2] = handle_d;
-	func[3] = handle_d;
+	func[2] = handle_dd;
+	func[3] = handle_dd;
 	func[4] = handle_o;
 	func[5] = handle_u;
 	func[6] = handle_x;

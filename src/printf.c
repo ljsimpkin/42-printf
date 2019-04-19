@@ -52,7 +52,7 @@ void initalize(conversion_table *argpart)
 	argpart->specifier = 0;
 	argpart->flags = 0;
 	argpart->error = 0;
-	argpart->conlen = 0;
+	argpart->formatlen = 0;
 	argpart->width = 0;
 	argpart->precision = 0;
 }

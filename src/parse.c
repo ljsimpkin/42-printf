@@ -7,9 +7,9 @@ void parse_conversions(conversion_table *argpart, const char *format)
 	int i;
 
 	i = 0;
-	argpart->conlen = ft_strlen(format);
-	argpart->conversions = (char *)malloc(sizeof(char) * argpart->conlen + 1);
-	ft_bzero(argpart->conversions, argpart->conlen);
+	argpart->formatlen = ft_strlen(format);
+	argpart->conversions = (char *)malloc(sizeof(char) * argpart->formatlen + 1);
+	ft_bzero(argpart->conversions, argpart->formatlen);
 
 	while (*format && !ft_strchr(SPECI, *format))
 	{
@@ -28,7 +28,7 @@ void parse_flags(conversion_table *argpart, const char *format)
 
 	i = 0;
 	y = 0;
-	argpart->flags = ft_strnew(argpart->conlen + 1);
+	argpart->flags = ft_strnew(argpart->formatlen + 1);
 	while (argpart->conversions[i])
 	{
 		if (ft_strchr(FLAGS, argpart->conversions[i]))
@@ -56,18 +56,35 @@ int parse_width(conversion_table *argpart, const char *format)
 	return(1);
 }
 
+int parse_zeroflag(conversion_table *argpart, const char *format)
+{
+	int i;
+
+	i = 0;
+	while (format[i])
+	{
+		if (format[i] == '0')
+			return(1);
+		else if (ft_strchr("123456789", format[i]))
+			return(0);
+		i++;
+	}
+	return(0);
+}
+
 int parse(conversion_table *argpart, const char *format)//use error int to check if valid
 {
 	parse_conversions(argpart, format);
 	parse_flags(argpart, format);
+	argpart->zero_flag = parse_zeroflag(argpart, format);
 	argpart->width = ft_atoi_skip(format);//parse_width(argpart, format);
+		// argpart->zero_flag = parse_zeroflag(argpart->width);
 	if (ft_strchr(format, '.'))
-		argpart->precision = ft_atoi_skip(ft_strchr(format, '.'));
-	// void parse_precision(conversion_table *argpart, const char *format);
-	// void parse_length(conversion_table *argpart, const char *format);
+		argpart->precision = ft_atoi_skip(ft_strchr(format, '.') + 1);
+
 	parse_specifiers(argpart, format);
-	// printf("Width = |%zu|\n", argpart->width);
-	// printf("Precision = |%zu|\n", argpart->precision);
+
+
 
 	// printf("atoi = %zu\n", argpart->width);
 	return(ft_strlen(argpart->conversions));
