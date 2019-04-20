@@ -32,7 +32,7 @@ int handle_c(va_list list, conversion_table *argpart)
 	return(len);
 }
 
-int handle_dd(va_list list, conversion_table *argpart)
+int handle_d(va_list list, conversion_table *argpart)
 {
 	int d = va_arg(list, int);
 	char *convert = ft_strnew(ft_digilen(d));
@@ -52,8 +52,23 @@ int handle_dd(va_list list, conversion_table *argpart)
 
 int handle_o(va_list list, conversion_table *argpart)
 {
-	unsigned int nb = va_arg(list, int);
-	ft_putnbr_fd_base(nb, 1, 8, 0);
+	unsigned int o = va_arg(list, int);
+	char *convert = ft_strnew(ft_digilen(o));
+	convert = ft_strcpy(convert, ft_itoa_base(o, 8)); //fix ft_strcpy
+	char *padding = ft_handle_width(o, convert, argpart);
+	handle_zeroes(padding, &convert, argpart);
+	// printf("padding = |%s|\n", padding);
+
+	// handle_one(argpart, &padding);
+	// printf("convert = |%s|\n", convert);
+	// printf("padding = |%s|\n", padding);
+
+	if (ft_strchr(argpart->flags, '-'))
+		convert = ft_strjoin(convert, padding);
+	else
+		convert = ft_strjoin(padding, convert);
+
+	write(1, convert, ft_strlen(convert));
 	return(1);
 }
 
@@ -91,8 +106,8 @@ int call_handler(va_list list, conversion_table *argpart)
 	int (*func[11])(va_list, conversion_table*);
 	func[0] = handle_c;
 	func[1] = handle_s;
-	func[2] = handle_dd;
-	func[3] = handle_dd;
+	func[2] = handle_d;
+	func[3] = handle_d;
 	func[4] = handle_o;
 	func[5] = handle_u;
 	func[6] = handle_x;

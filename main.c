@@ -7,8 +7,8 @@ int main()
 	// ft_printf("str = |%s",str);
 	// ft_printf("str = |%d|\n", 42);
 	// printf("str = |%d|\n", 42);
-	printf("prif |%5.43d| after\n", -42);
-	ft_printf("test |%5.43d| after\n", -42);
+	printf("prif |%#o| after\n", 123); //#works over and withinn precision
+	ft_printf("test |%#o| after\n", 123);
 
 	return(0);
 

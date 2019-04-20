@@ -26,7 +26,7 @@ if (!ft_search(argpart.conversions, SPECI))
 	return(0);
 }
 // else if valid chars
-// else if (incompatable_conversions)
+// else if (incompatable_conversions) ef signs not working with oxX
 // 	return(0);
 return(1);
 }

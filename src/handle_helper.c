@@ -9,6 +9,7 @@ static int	ft_isblank(const char *str, int i)
 		*(str + i) == '\f' ||
 		*(str + i) == ' '  ||
 		*(str + i) == '-'  ||
+		*(str + i) == '#'  ||
 		*(str + i) == '+')
 		i++;
 	return (i);
@@ -43,6 +44,38 @@ void	ft_putnbr_fd_base(unsigned long long n, int fd, int base, int upper) //fix 
 	else
 		ft_putchar_fd(n + '0', fd);
 }
+static void	itoa_isnegative(int *n, int *negative)
+{
+	if (*n < 0)
+	{
+		*n *= -1;
+		*negative = 1;
+	}
+}
+
+char		*ft_itoa_base(int n, int base)
+{
+	int		len;
+	int		negative;
+	char	*str;
+
+	if (n == -2147483648)
+		return (ft_strdup("-2147483648"));
+	negative = 0;
+	itoa_isnegative(&n, &negative);
+	len = ft_number_len(n) + negative;
+	if ((str = (char*)malloc(sizeof(char) * len)) == NULL)
+		return (NULL);
+	str[len] = '\0';
+	while (len--)
+	{
+		str[len] = n % base + '0';
+		n = n / base;
+	}
+	if (negative)
+		str[0] = '-';
+	return (str);
+}
 
 int ft_digilen(int nb) // -ve doesn't count for precision but it does for width
 {
@@ -66,6 +99,7 @@ int handle_sign(int nb, char **convert, conversion_table *argpart)
 	int nve;
 	int space;
 	int pve;
+	int nps;
 	int i;
 
 	i = 0;
@@ -173,7 +207,7 @@ char *ft_strnewchr(int len, char c)
 
 char *ft_handle_width(int nb, char * convert, conversion_table *argpart)
 {
-	int sign = ft_sign(nb, argpart);
+	int sign = ft_sign(nb, argpart); //need to modify to work with oxX
 
 	int len = MAX(ft_strlen(convert), argpart->precision);
 
@@ -202,7 +236,10 @@ void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
 	else if (argpart->zero_flag && !ft_strchr(argpart->flags, '-') && !ft_strchr(argpart->conversions, '.'))
 	{
 		if ((padding = handle_zero(padding, argpart)))
-			*convert = ft_strjoin(padding, *convert);
+		{
+						*convert = ft_strjoin(padding, *convert);
+						// *padding = '\0';
+		}
 	}
 }
 
