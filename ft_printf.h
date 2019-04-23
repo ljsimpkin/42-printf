@@ -55,4 +55,7 @@ int handle_sign(int nb, char **convert, conversion_table *argpart);
 
 int handle_c(va_list list, conversion_table *argpart);
 int handle_s(va_list list, conversion_table *argpart);
+char		*ft_itoa_base(int n, int base);
+char	*ft_itoa_base2(int n, int base, int uppercase);
+char	*itoa_base3(int value, int base);
 #endif

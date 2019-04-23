@@ -15,6 +15,40 @@ static int	ft_isblank(const char *str, int i)
 	return (i);
 }
 
+static int		conv_ex(int nb)
+{
+	if (nb >= 10)
+		return (nb - 10 + 'a');
+	else
+		return (nb + '0');
+}
+
+char	*itoa_base3(int value, int base)
+{
+	int					i;
+	char				*str;
+	int				tmp;
+
+	i = 0;
+	tmp = value;
+	while (tmp >= base)
+	{
+		tmp = tmp / base;
+		i++;
+	}
+	if (!(str = (char *)malloc(sizeof(char) * (i + 1))))
+		return (NULL);
+	str[i + 1] = '\0';
+	while (i >= 0)
+	{
+		tmp = value % base;
+		str[i] = conv_ex(tmp);
+		value /= base;
+		i--;
+	}
+	return (str);
+}
+
 int			ft_atoi_skip(const char *s) // include max int?
 {
 	int			i;
@@ -75,6 +109,80 @@ char		*ft_itoa_base(int n, int base)
 	if (negative)
 		str[0] = '-';
 	return (str);
+}
+
+int		ft_power(int nb, int power)
+{
+	if (power == 0)
+		return (1);
+	else if (power < 0)
+		return (0);
+	return (nb * ft_power(nb, power - 1));
+}
+
+long	ft_power_long(long nb, long pow)
+{
+	if (pow == 0)
+		return (1);
+	else if (pow < 0)
+		return (0);
+	return (nb * ft_power(nb, pow - 1));
+}
+
+long	ft_nbrlen(long nb, long base)
+{
+	long	length;
+
+	length = 1;
+	while (ft_power_long(base, length) <= nb)
+		length++;
+	return (length);
+}
+
+char	*ft_strrev(char *str)
+{
+	int		i;
+	int		length;
+	char	temp;
+
+	i = 0;
+	length = ft_strlen(str);
+	while (i < (length / 2))
+	{
+		temp = str[i];
+		str[i] = str[length - i - 1];
+		str[length - i - 1] = temp;
+		i++;
+	}
+	str[length] = '\0';
+	return (str);
+}
+
+char	*ft_itoa_base2(int n, int base, int uppercase) //look into this...
+{
+	char	*str;
+	int		i;
+	int		length;
+
+	if (base < 2 || base > 16 || (base != 10 && n < 0))
+		return (NULL);
+	if (base == 10)
+		return (ft_itoa(n));
+	length = ft_nbrlen(n, base);
+	str = (char*)malloc(sizeof(*str) * (length + 1));
+	i = 0;
+	while (i < length)
+	{
+		if (base > 10 && (n % base >= 10) && uppercase)
+			str[i++] = (n % base) - 10 + 'A';
+		else if (base > 10 && (n % base >= 10))
+			str[i++] = (n % base) - 10 + 'a';
+		else
+			str[i++] = (n % base) + '0';
+		n /= base;
+	}
+	str[i] = '\0';
+	return (ft_strrev(str));
 }
 
 int ft_digilen(int nb) // -ve doesn't count for precision but it does for width
@@ -159,10 +267,27 @@ char * handle_zero(char *padding, conversion_table *argpart)
 			i++;
 		}
 		if (ft_strchr(argpart->flags, ' '))
-			padding[--i] = '\0';
+			padding[i] = '\0';
 		return(padding);
 	}
 	return(0);
+}
+
+void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
+{
+	if (argpart->precision)
+	{
+		handle_precision(convert, argpart);
+	}
+	else if (argpart->zero_flag && !ft_strchr(argpart->flags, '-') && !ft_strchr(argpart->conversions, '.'))
+	{
+		if ((padding = handle_zero(padding, argpart)))
+		{
+						*convert = ft_strjoin(padding, *convert);
+						if (*padding == '0') //fixes
+						 	*padding = '\0';
+		}
+	}
 }
 
 int remove_dupsign(char *convert)
@@ -220,27 +345,16 @@ char *ft_handle_width(int nb, char * convert, conversion_table *argpart)
 	return("");
 }
 
-int handle_precision(char **convert, conversion_table *argpart)
+int handle_precision(char **convert, conversion_table *argpart) //***********
 {
 	if (argpart->precision - ft_strlen(*convert) > 0)
-		*convert = ft_strjoin(ft_strnewchr(argpart->precision - ft_strlen(*convert), '0'), *convert);
-	return(0);
-}
+	{
+		char *newchr =  ft_strnewchr(argpart->precision - ft_strlen(*convert), '0');
 
-void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
-{
-	if (argpart->precision)
-	{
-		handle_precision(convert, argpart);
+		if (newchr)
+			*convert = ft_strjoin(newchr, *convert);
 	}
-	else if (argpart->zero_flag && !ft_strchr(argpart->flags, '-') && !ft_strchr(argpart->conversions, '.'))
-	{
-		if ((padding = handle_zero(padding, argpart)))
-		{
-						*convert = ft_strjoin(padding, *convert);
-						// *padding = '\0';
-		}
-	}
+	return(0);
 }
 
 int dup_put_char(int len, int width, int ch) //precision combine and just return length

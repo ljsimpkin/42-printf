@@ -26,12 +26,12 @@ if (!ft_search(argpart.conversions, SPECI))
 	return(0);
 }
 // else if valid chars
-// else if (incompatable_conversions) ef signs not working with oxX
+// else if (incompatable_conversions) ef signs not working with oxX // ' ' not specified with oxX
 // 	return(0);
 return(1);
 }
 
-int ft_putbasic(const char *format)
+int ft_putbasic(const char *format, int *printed)
 {
 	char *percent_ptr = 0;
 	int str_len = 0;
@@ -42,6 +42,7 @@ int ft_putbasic(const char *format)
 	else
 		str_len = ft_strlen(format);
 
+	*printed = *printed + str_len;
 	write(1,format, str_len);
 	return(str_len);
 }
@@ -60,7 +61,9 @@ void initalize(conversion_table *argpart)
 int ft_printf(const char *format, ...)
 {
 	int place;
+	int printed;
 	place = 0;
+	printed = 0;
 	va_list list;
 	conversion_table argpart;
 	initalize(&argpart);
@@ -75,14 +78,12 @@ int ft_printf(const char *format, ...)
 			place = parse(&argpart, format);
 			if (valid_conversion(argpart, format))
 			{
-				// convert(&argpart, format);
-				call_handler(list, &argpart);
-				// initial_and_free_lists();
+				printed = printed + call_handler(list, &argpart);
 				format = place + format; // format = ft_search(format, SPECI) ? ft_search(format, SPECI) + 1 : ft_strchr(format, '\n');
 			}
 		}
 		else
-			format = format + (ft_putbasic(format));
+			format = format + (ft_putbasic(format, &printed));
 	}
-	return(0);
+	return(printed);
 }
