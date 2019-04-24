@@ -78,6 +78,60 @@ void	ft_putnbr_fd_base(unsigned long long n, int fd, int base, int upper) //fix 
 	else
 		ft_putchar_fd(n + '0', fd);
 }
+
+char *ft_strrev2(char *str)
+{
+	char tmp;
+	int i;
+	int len;
+
+	tmp = 0;
+	len = ft_strlen(str) - 1;
+	i = 0;
+	while (i < (len - i))
+	{
+		tmp = str[i];
+		str[i] = str[len - i];
+		str[len - i] = tmp;
+		i++;
+	}
+	return(str);
+}
+
+char*	ft_itoa_fd_base2(unsigned long long n, int fd, int base, int upper) //fix -ve -o -x
+{
+	char * str;
+	int n2;
+	int i;
+
+	str = ft_strnew(12);
+	n2 = 0;
+	i = 0;
+
+	while (n >= 1) // or zero?
+	{
+		n2 = n % base;
+		if (upper && n2 > 9)
+			str[i] = (n2 + 'A' - 10);
+		else if (n2 > 9)
+			str[i] = (n2 + 'a' - 10);
+		else
+			str[i] = (n2 + '0');
+		n = n / base;
+		i++;
+	}
+
+	str[i++] = '\0';
+
+	return(ft_strrev2(str)); //rev
+}
+
+// int main()
+// {
+// 	long nb = 4294983258;
+// 	printf("the str = |%s|\n", ft_putnbr_fd_base2(nb, 1, 16, 0));
+// }
+
 static void	itoa_isnegative(int *n, int *negative)
 {
 	if (*n < 0)
@@ -185,7 +239,7 @@ char	*ft_itoa_base2(int n, int base, int uppercase) //look into this...
 	return (ft_strrev(str));
 }
 
-int ft_digilen(int nb) // -ve doesn't count for precision but it does for width
+int ft_digilen(long long nb) // -ve doesn't count for precision but it does for width
 {
 	int len;
 
@@ -202,7 +256,7 @@ int ft_digilen(int nb) // -ve doesn't count for precision but it does for width
 	return(len);
 }
 
-int handle_sign(int nb, char **convert, conversion_table *argpart)
+int handle_sign(long long nb, char **convert, conversion_table *argpart)
 {
 	int nve;
 	int space;
@@ -244,8 +298,19 @@ int handle_sign(int nb, char **convert, conversion_table *argpart)
 // 	return(ft_strlen(*convert));
 // }
 
-int positive(int nb)
+long long positive(long long nb)
 {
+ 	if (nb < -9223372036854775807)
+		return(9223372036854775807);
+	if (nb < 0)
+		return(nb * -1);
+	else
+		return(nb);
+}
+
+double positive2(double nb)
+{
+	printf("nb = %f\n", nb);
 	if (nb < 0)
 		return(nb * -1);
 	else
@@ -259,6 +324,27 @@ char * handle_zero(char *padding, conversion_table *argpart)
 	i = 0;
 
 	if(padding && !argpart->precision && argpart->zero_flag &&!ft_strchr(argpart->flags, '-') && !ft_strchr(argpart->conversions, '.'))
+	{
+		while (padding[i] != '\0')
+		{
+			if (padding[i] == ' ')
+				padding[i] = '0';
+			i++;
+		}
+		if (ft_strchr(argpart->flags, ' '))
+			padding[i] = '\0';
+		return(padding);
+	}
+	return(0);
+}
+
+char * handle_zero2(char *padding, conversion_table *argpart)
+{
+	int i;
+
+	i = 0;
+
+	if(padding && argpart->zero_flag && !ft_strchr(argpart->flags, '-'))
 	{
 		while (padding[i] != '\0')
 		{
@@ -305,7 +391,7 @@ int remove_dupsign(char *convert)
 	return(1);
 }
 
-int ft_sign(int d, conversion_table *argpart)
+int ft_sign(long long d, conversion_table *argpart)
 {
 	int nve = ((d < 0) ? 1 : 0); // improve readability with the environmental function in the header
 	int space = (ft_strchr(argpart->flags, ' ')) ? 1 : 0;
@@ -330,7 +416,7 @@ char *ft_strnewchr(int len, char c)
 	return(0);
 }
 
-char *ft_handle_width(int nb, char * convert, conversion_table *argpart)
+char *ft_handle_width(long long nb, char * convert, conversion_table *argpart)
 {
 	int sign = ft_sign(nb, argpart); //need to modify to work with oxX
 
@@ -339,8 +425,14 @@ char *ft_handle_width(int nb, char * convert, conversion_table *argpart)
 	char *padding;
 	if (argpart->width > argpart->precision)
 	{
-		padding = ft_strnewchr(argpart->width - len - sign, ' ');
-		return(padding);
+		int pflag;
+
+		pflag = (argpart->specifier == 'p' ? 2 : 0);
+		padding = ft_strnewchr(argpart->width - len - sign - pflag, ' ');
+		if (padding)
+			return(padding);
+		else
+			return("");
 	}
 	return("");
 }
@@ -385,4 +477,95 @@ int dup_put_char2(int len, int ch) //precision combine and just return length
 	}
 	else
 		return(0);
+}
+
+int	ft_number_len2(long long nb)
+{
+	int i;
+
+	i = 1;
+	while (nb < -9223372036854775807)
+	{
+		i++;
+		nb = nb / 10;
+	}
+	if (nb < 0)
+	{
+		nb = nb * -1;
+		i++;
+	}
+	while (nb > 9)
+	{
+		nb = nb / 10;
+		i++;
+	}
+	return (i);
+}
+
+static void	itoa_isnegative2(long long *n, int *negative)
+{
+	if (*n < 0)
+	{
+		*n *= -1;
+		*negative = 1;
+	}
+}
+
+char		*ft_itoa2(long long n)
+{
+	int		len;
+	int		negative;
+	char	*str;
+
+	if (n == -2147483648)
+		return (ft_strdup("-2147483648"));
+	negative = 0;
+	itoa_isnegative2(&n, &negative);
+	len = ft_number_len2(n) + negative;
+	if ((str = (char*)malloc(sizeof(char) * len)) == NULL)
+		return (NULL);
+	str[len] = '\0';
+	while (len--)
+	{
+		str[len] = n % 10 + '0';
+		n = n / 10;
+	}
+	if (negative)
+		str[0] = '-';
+	return (str);
+}
+
+static int	places(unsigned long long n)
+{
+	int count;
+
+	count = 0;
+	if (n == 0)
+		return (1);
+	while (n != 0)
+	{
+		++count;
+		n /= 16;
+	}
+	return (count);
+}
+
+char		*ft_ptoa(void *p, char c) // hanles max long long
+{
+	char				*s;
+	unsigned long long	n;
+	int					i;
+
+	n = (unsigned long long)p;
+	i = places(n);
+	if (!(s = (char*)ft_memalloc(i + 1)))
+		return (NULL);
+	if (p == NULL)
+		s[0] = '0';
+	while (n)
+	{
+		s[--i] = (n % 16 > 9) ? (n % 16 - 10 + c) : (n % 16 + '0');
+		n /= 16;
+	}
+	return (s);
 }
