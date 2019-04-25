@@ -1,4 +1,4 @@
-#include "../ft_printf.h"
+#include "ft_printf.h"
 
 static int	ft_isblank(const char *str, int i)
 {
@@ -125,12 +125,6 @@ char*	ft_itoa_fd_base2(unsigned long long n, int fd, int base, int upper) //fix 
 
 	return(ft_strrev2(str)); //rev
 }
-
-// int main()
-// {
-// 	long nb = 4294983258;
-// 	printf("the str = |%s|\n", ft_putnbr_fd_base2(nb, 1, 16, 0));
-// }
 
 static void	itoa_isnegative(int *n, int *negative)
 {
@@ -310,7 +304,6 @@ long long positive(long long nb)
 
 double positive2(double nb)
 {
-	printf("nb = %f\n", nb);
 	if (nb < 0)
 		return(nb * -1);
 	else
@@ -376,6 +369,23 @@ void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
 	}
 }
 
+void handle_zeroes2(char *padding, char **convert, conversion_table *argpart)
+{
+	if (argpart->precision && !argpart->zero_flag)
+	{
+		handle_precision(convert, argpart);
+	}
+	else if (argpart->zero_flag && !ft_strchr(argpart->flags, '-'))
+	{
+		if ((padding = handle_zero2(padding, argpart)))
+		{
+						*convert = ft_strjoin(padding, *convert);
+						if (*padding == '0') //fixes
+						 	*padding = '\0';
+		}
+	}
+}
+
 int remove_dupsign(char *convert)
 {
 	char *pt;
@@ -393,11 +403,14 @@ int remove_dupsign(char *convert)
 
 int ft_sign(long long d, conversion_table *argpart)
 {
+	int ret = 0;
 	int nve = ((d < 0) ? 1 : 0); // improve readability with the environmental function in the header
 	int space = (ft_strchr(argpart->flags, ' ')) ? 1 : 0;
 	int pve = (ft_strchr(argpart->flags, '+') && !nve) ? 1 : 0;
 
-	return(((nve + pve + space) >= 1) ? 1 : 0);
+	ret = ((nve + pve + space) >= 1) ? 1 : 0;
+	ret = ((argpart->specifier = '%') ? 0 : ret);
+	return(ret);
 }
 
 char *ft_strnewchr(int len, char c)

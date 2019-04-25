@@ -1,4 +1,4 @@
-#include "../ft_printf.h"
+#include "ft_printf.h"
 
 // printf(%[FLAGS][WIDTH][.PRECISION][LENGTH][SPECIFIER])
 

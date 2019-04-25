@@ -1,4 +1,4 @@
-#include "../ft_printf.h"
+#include "ft_printf.h"
 
 int handle_s(va_list list, conversion_table *argpart)
 {
@@ -61,7 +61,7 @@ int handle_d(va_list list, conversion_table *argpart)
 	int len = 0;
 	long long nb = handle_length(list, argpart);
 	char *convert = ft_strnew(ft_number_len2(nb));
-	convert = strcpy(convert, ft_itoa2(positive2(nb))); //fix ft_strcpy
+	convert = ft_strcpy(convert, ft_itoa2(positive2(nb))); //fix ft_strcpy
 	char *padding = ft_handle_width(nb, convert, argpart);
 	handle_zeroes(padding, &convert, argpart);
 	handle_sign(nb, &convert, argpart);
@@ -229,6 +229,9 @@ long double rounding(double nb, conversion_table *argpart)
 	i = 0;
 	precision = argpart->precision ? argpart->precision : 6;
 
+	if (ft_strchr(argpart->conversions, '.') && precision == 6 && argpart->precision == 0)
+		precision = 0;
+
 	rd = 5;
 
 	while (i <= precision)
@@ -273,7 +276,8 @@ int handle_f(va_list list, conversion_table *argpart)
 	char *frac = fractional(nb, argpart);
 	char *convert = ft_strjoin(integ, frac);
 	char *padding = ft_handle_width(nb, convert, argpart);
-	handle_zero2(padding, argpart);
+	// handle_zero2(padding, argpart);
+	handle_zeroes2(padding, &convert, argpart);
 	handle_sign(nb, &convert, argpart);
 
 	if (ft_strchr(argpart->flags, '-'))
@@ -285,6 +289,25 @@ int handle_f(va_list list, conversion_table *argpart)
 	write(1, convert, len);
 	return(1);
  }
+
+ int handle_percent(va_list list, conversion_table *argpart)
+ {
+	int len = 0;
+	char * convert = ft_strdup("%"); //fix ft_strcpy
+ 	char *padding = ft_handle_width(1, convert, argpart);
+ 	handle_zeroes(padding, &convert, argpart);
+ 	// handle_sign(nb, &convert, argpart);
+
+ 	if (ft_strchr(argpart->flags, '-'))
+ 		convert = ft_strjoin(convert, padding);
+ 	else
+ 		convert = ft_strjoin(padding, convert);
+ 	len = ft_strlen(convert);
+  	write(1, convert, len);
+	 return(1);
+ }
+
+
 
 int call_handler(va_list list, conversion_table *argpart)
 {
@@ -299,8 +322,9 @@ int call_handler(va_list list, conversion_table *argpart)
 	func[7] = handle_X;
 	func[8] = handle_p;
 	func[9] = handle_f;
+	func[10]= handle_percent;
 
-	const char *keys = "csdiouxXpf";
+	const char *keys = "csdiouxXpf%";
 	int y = ft_strchr(keys, argpart->specifier) - keys;
 	return(func[y](list, argpart));
 }

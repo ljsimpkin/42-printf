@@ -1,4 +1,4 @@
-#include "../ft_printf.h"
+#include "ft_printf.h"
 
 char *ft_search(const char *str, char*search)
 {
@@ -16,13 +16,18 @@ char *ft_search(const char *str, char*search)
 	return(0);
 }
 
-int valid_conversion(conversion_table argpart, const char *format)
+int valid_conversion(conversion_table argpart, const char *format, va_list list)
 {
 // if (argpart.error)
 // 	return(0);
 if (!ft_search(argpart.conversions, SPECI))
 {
 	ft_putstr("invalid conversions");
+	return(0);
+}
+if (ft_strchr(SPECI, 'x') && va_arg(list, int) <= 0)
+{
+	// ft_putstr("invalid conversions");
 	return(0);
 }
 // else if valid chars
@@ -76,7 +81,7 @@ int ft_printf(const char *format, ...)
 		{
 			format++;
 			place = parse(&argpart, format);
-			if (valid_conversion(argpart, format))
+			if (valid_conversion(argpart, format, list))
 			{
 				printed = printed + call_handler(list, &argpart);
 				format = place + format; // format = ft_search(format, SPECI) ? ft_search(format, SPECI) + 1 : ft_strchr(format, '\n');
