@@ -65,3 +65,47 @@ int search_precision(const char *format)
 // 		// else if()
 // 	}
 // }
+
+long long int handle_length(va_list list, cv_table *argpart)
+{
+	long long nb = va_arg(list, long long);
+	if (argpart->lengths == 0) // INT
+		return((long long) (int)nb);
+	else if (argpart->lengths == HH) //SIGNED CHAR
+	{
+		nb = (char)nb;
+		return((long long)nb);
+	}
+	else if (argpart->lengths == H) //SHORT INT
+	{
+		nb = (short int)nb;
+		return((long long)nb);
+	}
+	else if (argpart->lengths == L) //LONG INT
+	{
+		nb = (long int)nb;
+		return((long long)nb);
+	}
+	else //LONG LONG
+		return (nb);
+}
+
+int call_handler(va_list list, cv_table *argpart)
+{
+	int (*func[12])(va_list, cv_table*);
+	func[0] = handle_c;
+	func[1] = handle_s;
+	func[2] = handle_d;
+	func[3] = handle_d;
+	func[4] = handle_o;
+	func[5] = handle_u;
+	func[6] = handle_x;
+	func[7] = handle_X;
+	func[8] = handle_p;
+	func[9] = handle_f;
+	func[10]= handle_percent;
+
+	const char *keys = "csdiouxXpf%";
+	int y = ft_strchr(keys, argpart->specifier) - keys;
+	return(func[y](list, argpart));
+}

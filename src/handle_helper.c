@@ -250,7 +250,7 @@ int ft_digilen(long long nb) // -ve doesn't count for precision but it does for 
 	return(len);
 }
 
-int handle_sign(long long nb, char **convert, conversion_table *argpart)
+int handle_sign(long long nb, char **convert, cv_table *argpart)
 {
 	int nve;
 	int space;
@@ -274,7 +274,7 @@ int handle_sign(long long nb, char **convert, conversion_table *argpart)
 
 }
 
-// int handle_precision2(char **convert, conversion_table *argpart)
+// int handle_precision2(char **convert, cv_table *argpart)
 // {
 // 	int precisionlen;
 // 	char *precision;
@@ -310,7 +310,7 @@ double positive2(double nb)
 		return(nb);
 }
 
-char * handle_zero(char *padding, conversion_table *argpart)
+char * handle_zero(char *padding, cv_table *argpart)
 {
 	int i;
 
@@ -331,7 +331,7 @@ char * handle_zero(char *padding, conversion_table *argpart)
 	return(0);
 }
 
-char * handle_zero2(char *padding, conversion_table *argpart)
+char * handle_zero2(char *padding, cv_table *argpart)
 {
 	int i;
 
@@ -352,11 +352,18 @@ char * handle_zero2(char *padding, conversion_table *argpart)
 	return(0);
 }
 
-void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
+void handle_zeroes(char *padding, char **convert, cv_table *argpart)
 {
-	if (argpart->precision)
+	if (argpart->precision && argpart->specifier != '%')
 	{
 		handle_precision(convert, argpart);
+	}
+	else if (argpart->precision && argpart->specifier == '%')
+	{
+		if (ft_strchr(argpart->flags, '-'))
+			*convert = ft_strjoin(*convert, ft_strnewchr(argpart->precision - 1, ' '));
+		else
+			*convert = ft_strjoin(ft_strnewchr(argpart->precision - 1, ' '), *convert);
 	}
 	else if (argpart->zero_flag && !ft_strchr(argpart->flags, '-') && !ft_strchr(argpart->conversions, '.'))
 	{
@@ -369,7 +376,7 @@ void handle_zeroes(char *padding, char **convert, conversion_table *argpart)
 	}
 }
 
-void handle_zeroes2(char *padding, char **convert, conversion_table *argpart)
+void handle_zeroes2(char *padding, char **convert, cv_table *argpart)
 {
 	if (argpart->precision && !argpart->zero_flag)
 	{
@@ -401,7 +408,7 @@ int remove_dupsign(char *convert)
 	return(1);
 }
 
-int ft_sign(long long d, conversion_table *argpart)
+int ft_sign(long long d, cv_table *argpart)
 {
 	int ret = 0;
 	int nve = ((d < 0) ? 1 : 0); // improve readability with the environmental function in the header
@@ -429,7 +436,7 @@ char *ft_strnewchr(int len, char c)
 	return(0);
 }
 
-char *ft_handle_width(long long nb, char * convert, conversion_table *argpart)
+char *ft_handle_width(long long nb, char * convert, cv_table *argpart)
 {
 	int sign = ft_sign(nb, argpart); //need to modify to work with oxX
 
@@ -450,7 +457,7 @@ char *ft_handle_width(long long nb, char * convert, conversion_table *argpart)
 	return("");
 }
 
-int handle_precision(char **convert, conversion_table *argpart) //***********
+int handle_precision(char **convert, cv_table *argpart) //***********
 {
 	if (argpart->precision - ft_strlen(*convert) > 0)
 	{

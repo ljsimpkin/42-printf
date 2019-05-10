@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lsimpkin <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/05/08 17:25:52 by lsimpkin          #+#    #+#             */
+/*   Updated: 2019/05/08 17:25:55 by lsimpkin         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_printf.h"
 
-char *ft_search(const char *str, char*search)
+char	*ft_search(const char *str, char *search)
 {
 	int pt;
 
@@ -9,37 +21,27 @@ char *ft_search(const char *str, char*search)
 	{
 		if (ft_strchr(str, *search))
 		{
-			return(ft_strchr(str, *search));
+			return (ft_strchr(str, *search));
 		}
 		search++;
 	}
-	return(0);
+	return (0);
 }
 
-int valid_conversion(conversion_table argpart, const char *format, va_list list)
+int		valid_conversion(cv_table argpart, const char *format, va_list list)
 {
-// if (argpart.error)
-// 	return(0);
-if (!ft_search(argpart.conversions, SPECI))
-{
-	ft_putstr("invalid conversions");
-	return(0);
-}
-if (ft_strchr(SPECI, 'x') && va_arg(list, int) <= 0)
-{
-	// ft_putstr("invalid conversions");
-	return(0);
-}
-// else if valid chars
-// else if (incompatable_conversions) ef signs not working with oxX // ' ' not specified with oxX
-// 	return(0);
-return(1);
+	if (!ft_search(argpart.conversions, SPECI))
+		return (0);
+	return (1);
 }
 
-int ft_putbasic(const char *format, int *printed)
+int		ft_putbasic(const char *format, int *printed)
 {
-	char *percent_ptr = 0;
-	int str_len = 0;
+	char	*percent_ptr;
+	int		str_len;
+
+	percent_ptr = 0;
+	str_len = 0;
 	percent_ptr = ft_strchr(format, '%');
 
 	if (percent_ptr)
@@ -49,10 +51,10 @@ int ft_putbasic(const char *format, int *printed)
 
 	*printed = *printed + str_len;
 	write(1,format, str_len);
-	return(str_len);
+	return (str_len);
 }
 
-void initalize(conversion_table *argpart)
+void	initalize(cv_table *argpart)
 {
 	argpart->conversions = 0;
 	argpart->specifier = 0;
@@ -63,32 +65,31 @@ void initalize(conversion_table *argpart)
 	argpart->precision = 0;
 }
 
-int ft_printf(const char *format, ...)
+int		ft_printf(const char *format, ...)
 {
-	int place;
-	int printed;
+	int			place;
+	int			printed;
+	va_list		list;
+	cv_table	argpart;
+
 	place = 0;
 	printed = 0;
-	va_list list;
-	conversion_table argpart;
 	initalize(&argpart);
 	va_start(list, format);
-
-	va_end(list);
-	while(*format)
+	while (*format)
 	{
-		if(*format == '%')
+		if (*format == '%')
 		{
-			format++;
-			place = parse(&argpart, format);
+			place = parse(&argpart, ++format);
 			if (valid_conversion(argpart, format, list))
 			{
 				printed = printed + call_handler(list, &argpart);
-				format = place + format; // format = ft_search(format, SPECI) ? ft_search(format, SPECI) + 1 : ft_strchr(format, '\n');
+				format = place + format;
 			}
 		}
 		else
 			format = format + (ft_putbasic(format, &printed));
 	}
-	return(printed);
+	va_end(list);
+	return (printed);
 }

@@ -1,6 +1,6 @@
 NAME = libftprintf.a
 # FLAGS = -Wall -Werror -Wextra
-SRC := ft_printf.c dispatch.c parse.c handle.c handle_helper.c
+SRC := ft_printf.c dispatch.c ft_parse.c ft_handle.c handle_helper.c
 SRC_DIR = ./src
 OBJECTS := $(SRC:.c=.o)
 LIBRARIES = libftprintf.a ./libft/libft.a
@@ -20,9 +20,9 @@ $(NAME):
 all: $(NAME)
 te: $(NAME)
 	clear
-	clang $(FLAGS) -c $(SRC) -I$(INC_DIR) -I$(LIB_DIR)
+	clang -g $(FLAGS) -c $(SRC) -I$(INC_DIR) -I$(LIB_DIR)
 	@ar -rc $(NAME) $(OBJECTS)
-	gcc -o extest test_main.c libftprintf.a
+	gcc -g -o extest test_main.c libftprintf.a
 	./extest
 clean:
 	@echo "cleaning..."
