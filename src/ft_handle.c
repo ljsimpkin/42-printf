@@ -1,16 +1,74 @@
 #include "ft_printf.h"
+#include <stdio.h>
+
+// if precision is greater than strlen -> don't change
+// if precision is less than strlen -> change
+// modifiedstring -> create a strnew function that creates up until the length passed into it (precision) or else end of the string passed into it
+
+// if width is greater than length of modifiedstring -> add spaces
+// if width is less than str –> do nothing
+// create a function that handles which side the spaces are joined to.
+
+char *handle_strprecision(char *str, cv_table *argpart)
+{
+	int len;
+	char *mod;
+
+	len = ft_strlen(str);
+
+	if (ft_strchr(argpart->conversions, '.') && len > argpart->precision)
+	{
+		// ft_putstr("2");
+		mod = ft_strnew(argpart->precision);
+		mod = ft_strncpy(mod, str, argpart->precision);
+	}
+	else //perhaps wouldn't need 2 options -> strncpy may also copy the null terminator...
+	{
+		mod = ft_strdup(str);
+	}
+	return(mod);
+}
+
+char *handle_strwidth(char *mod, cv_table *argpart)
+{
+	int len;
+	char *wide;
+
+	len = ft_strlen(mod);
+
+	if (len < argpart->width)
+	{
+		wide = ft_strnewchr(argpart->width - len, ' ');
+
+		if (ft_strchr(argpart->flags, '-'))
+			mod = ft_strjoin(mod, wide);
+		else
+			mod = ft_strjoin(wide, mod);
+	}
+
+	free (wide);
+
+	return (mod);
+
+}
 
 int	handle_s(va_list list, cv_table *argpart)
 {
-	int		len;
 	char	*str;
+	char	*mod;
+	char	*width;
 
-	len = 0;
 	str = va_arg(list, char *);
-	len = dup_put_char(ft_strlen(str), argpart->width, ' ') + ft_strlen(str);
-	ft_putstr(str);
-	write(1, str, ft_strlen(str));
-	return (len);
+	if (!str)
+		str = "(null)";
+
+	mod = handle_strprecision(str, argpart);
+	mod = handle_strwidth(mod, argpart);
+
+
+	write(1, mod, ft_strlen(mod));
+	return (ft_strlen(mod));
+
 }
 
 int	handle_c(va_list list, cv_table *argpart)
