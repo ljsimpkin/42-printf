@@ -47,7 +47,6 @@ char *handle_strwidth(char *mod, cv_table *argpart)
 	}
 
 	free (wide);
-
 	return (mod);
 
 }
@@ -73,22 +72,44 @@ int	handle_s(va_list list, cv_table *argpart)
 
 int	handle_c(va_list list, cv_table *argpart)
 {
-	int		len;
-	char	ch;
+	char	*str;
+	char	*mod;
+	char	*width;
+	int 	len;
 
-	len = 0;
-	ch = va_arg(list, int);
-	if (ft_strchr(argpart->flags, '-'))
+	str = ft_strnew(2);
+	str[0] = va_arg(list, int);
+	str[1] = '\0';
+	if (!str[0])
+		len = 1;
+
+	mod = handle_strprecision(str, argpart);
+	mod = handle_strwidth(mod, argpart);
+
+	len = ft_strlen(mod);
+
+	write(1, mod, ft_strlen(mod));
+	return (len ? len : 1);
+}
+
+char * handle_nbprecision(char* str, cv_table *argpart)
+{
+	int len;
+	char *mod;
+
+	len = ft_strlen(str);
+
+	if (ft_strchr(argpart->conversions, '.') && len < argpart->precision)
 	{
-		ft_putchar(ch);
-		len = dup_put_char(1, argpart->width, ' ') + 1;
+		ft_putstr("2");
+		mod = ft_strnewchr(argpart->precision, '0');
+		mod = ft_strcpy(mod + (argpart->precision - len - 1), str);
 	}
-	else
+	else //perhaps wouldn't need 2 options -> strncpy may also copy the null terminator...
 	{
-		len = dup_put_char(1, argpart->width, ' ') + 1;
-		ft_putchar(ch);
+		mod = ft_strdup(str);
 	}
-	return (len);
+	return(mod);
 }
 
 int	handle_d(va_list list, cv_table *argpart)
@@ -101,7 +122,7 @@ int	handle_d(va_list list, cv_table *argpart)
 	len = 0;
 	nb = handle_length(list, argpart);
 	convert = ft_strnew(ft_number_len2(nb));
-	convert = ft_strcpy(convert, ft_itoa2(positive2(nb)));
+	convert = ft_strcpy(convert, ft_itoa_base2(positive(nb),10,0));
 	padding = ft_handle_width(nb, convert, argpart);
 	handle_zeroes(padding, &convert, argpart);
 	handle_sign(nb, &convert, argpart);

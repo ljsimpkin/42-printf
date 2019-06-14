@@ -55,17 +55,6 @@ int search_precision(const char *format)
     return (0);
 }
 
-// void parse(t_table *argpart, const char *format)
-// {
-// 	while (*format && !(search_specifiers(format)))
-// 	{
-// 		if(search_flags(format))
-// 			argpart->flag = ft_strjoin(format, argpart->flag);
-// 		format++;
-// 		// else if()
-// 	}
-// }
-
 long long int handle_length(va_list list, cv_table *argpart)
 {
 	long long nb = va_arg(list, long long);
@@ -90,10 +79,11 @@ long long int handle_length(va_list list, cv_table *argpart)
 		return (nb);
 }
 
+
 int call_handler(va_list list, cv_table *argpart)
 {
 	int (*func[12])(va_list, cv_table*);
-	func[0] = handle_c;
+	func[0] = handle_c; //handle c
 	func[1] = handle_s;
 	func[2] = handle_d;
 	func[3] = handle_d;

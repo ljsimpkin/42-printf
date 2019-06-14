@@ -1,4 +1,28 @@
-#include "ft_printf.h"
+// #include "ft_printf.h"
+#include "../includes/ft_printf.h"
+
+int	ft_number_len2(long long nb)
+{
+	int i;
+
+	i = 1;
+	while (nb < -9223372036854775807)
+	{
+		i++;
+		nb = nb / 10;
+	}
+	if (nb < 0)
+	{
+		nb = nb * -1;
+		i++;
+	}
+	while (nb > 9)
+	{
+		nb = nb / 10;
+		i++;
+	}
+	return (i);
+}
 
 static int	ft_isblank(const char *str, int i)
 {
@@ -10,7 +34,8 @@ static int	ft_isblank(const char *str, int i)
 		*(str + i) == ' '  ||
 		*(str + i) == '-'  ||
 		*(str + i) == '#'  ||
-		*(str + i) == '+')
+		*(str + i) == '+' ||
+		*(str + i) == '0')
 		i++;
 	return (i);
 }
@@ -168,7 +193,7 @@ int		ft_power(int nb, int power)
 	return (nb * ft_power(nb, power - 1));
 }
 
-long	ft_power_long(long nb, long pow)
+long	ft_power_long(long long nb, long pow)
 {
 	if (pow == 0)
 		return (1);
@@ -177,7 +202,7 @@ long	ft_power_long(long nb, long pow)
 	return (nb * ft_power(nb, pow - 1));
 }
 
-long	ft_nbrlen(long nb, long base)
+long	ft_nbrlen(long long nb, long base)
 {
 	long	length;
 
@@ -206,7 +231,7 @@ char	*ft_strrev(char *str)
 	return (str);
 }
 
-char	*ft_itoa_base2(int n, int base, int uppercase) //look into this...
+char	*ft_itoa_base2(long long n, int base, int uppercase) //look into this...
 {
 	char	*str;
 	int		i;
@@ -214,9 +239,10 @@ char	*ft_itoa_base2(int n, int base, int uppercase) //look into this...
 
 	if (base < 2 || base > 16 || (base != 10 && n < 0))
 		return (NULL);
-	if (base == 10)
-		return (ft_itoa(n));
-	length = ft_nbrlen(n, base);
+	// if (base == 10)
+	// 	return (ft_itoa(n));
+	// length = ft_nbrlen(n, base);
+	length = ft_number_len2(n);
 	str = (char*)malloc(sizeof(*str) * (length + 1));
 	i = 0;
 	while (i < length)
@@ -261,7 +287,7 @@ int handle_sign(long long nb, char **convert, cv_table *argpart)
 	i = 0;
 	nve = ((nb < 0) ? 1 : 0); // improve readability with the environmental function in the header
 	space = (ft_strchr(argpart->flags, ' ')) ? 1 : 0;
-	pve = (ft_strchr(argpart->flags, '+') && nb > 0) ? 1 : 0;
+	pve = (ft_strchr(argpart->flags, '+') && nb >= 0) ? 1 : 0;
 
 	if (nve)
 		 *convert = ft_strjoin("-", *convert); //must be placed before precision //free memory
@@ -302,14 +328,6 @@ long long positive(long long nb)
 		return(nb);
 }
 
-double positive2(double nb)
-{
-	if (nb < 0)
-		return(nb * -1);
-	else
-		return(nb);
-}
-
 char * handle_zero(char *padding, cv_table *argpart)
 {
 	int i;
@@ -324,8 +342,8 @@ char * handle_zero(char *padding, cv_table *argpart)
 				padding[i] = '0';
 			i++;
 		}
-		if (ft_strchr(argpart->flags, ' '))
-			padding[i] = '\0';
+		// if (ft_strchr(argpart->flags, ' '))
+		// 	padding[i] = '\0';
 		return(padding);
 	}
 	return(0);
@@ -354,7 +372,7 @@ char * handle_zero2(char *padding, cv_table *argpart)
 
 void handle_zeroes(char *padding, char **convert, cv_table *argpart)
 {
-	if (argpart->precision && argpart->specifier != '%')
+	if (ft_strchr(argpart->conversions, '.') && argpart->specifier != '%')
 	{
 		handle_precision(convert, argpart);
 	}
@@ -416,7 +434,7 @@ int ft_sign(long long d, cv_table *argpart)
 	int pve = (ft_strchr(argpart->flags, '+') && !nve) ? 1 : 0;
 
 	ret = ((nve + pve + space) >= 1) ? 1 : 0;
-	ret = ((argpart->specifier = '%') ? 0 : ret);
+	ret = ((argpart->specifier == '%') ? 0 : ret);
 	return(ret);
 }
 
@@ -442,6 +460,9 @@ char *ft_handle_width(long long nb, char * convert, cv_table *argpart)
 
 	int len = MAX(ft_strlen(convert), argpart->precision);
 
+	if (nb == 0 && argpart->precision == 0 && ft_strchr(argpart->conversions, '.'))
+		len = 0;
+
 	char *padding;
 	if (argpart->width > argpart->precision)
 	{
@@ -459,13 +480,23 @@ char *ft_handle_width(long long nb, char * convert, cv_table *argpart)
 
 int handle_precision(char **convert, cv_table *argpart) //***********
 {
-	if (argpart->precision - ft_strlen(*convert) > 0)
+	if (argpart->precision > ft_strlen(*convert))
 	{
 		char *newchr =  ft_strnewchr(argpart->precision - ft_strlen(*convert), '0');
 
 		if (newchr)
 			*convert = ft_strjoin(newchr, *convert);
 	}
+	else if (argpart->precision == 0)
+	{
+		// ft_putstr("enter");
+		if (*convert[0] == '0')
+			*convert[0] = '\0';
+	}
+	// ft_putstr("\nconvert = ");
+	// ft_putstr(*convert);
+	// while (1);
+	//else if(convert == )
 	return(0);
 }
 
@@ -497,29 +528,6 @@ int dup_put_char2(int len, int ch) //precision combine and just return length
 	}
 	else
 		return(0);
-}
-
-int	ft_number_len2(long long nb)
-{
-	int i;
-
-	i = 1;
-	while (nb < -9223372036854775807)
-	{
-		i++;
-		nb = nb / 10;
-	}
-	if (nb < 0)
-	{
-		nb = nb * -1;
-		i++;
-	}
-	while (nb > 9)
-	{
-		nb = nb / 10;
-		i++;
-	}
-	return (i);
 }
 
 static void	itoa_isnegative2(long long *n, int *negative)

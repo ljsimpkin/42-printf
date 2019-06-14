@@ -12,28 +12,28 @@
 
 #include "ft_printf.h"
 
-void	parse_conversions(cv_table *argpart, const char *format)
+void	parse_conversions(cv_table *argpart, const char *conversions)
 {
 	int i;
 	int size;
 
 	i = 0;
-	argpart->formatlen = ft_strlen(format);
+	argpart->formatlen = ft_strlen(conversions);
 	size = argpart->formatlen + 1;
 	argpart->conversions = (char *)malloc(sizeof(char) * size);
 	ft_bzero(argpart->conversions, argpart->formatlen);
 
-	while (*format && !ft_strchr(SPECI, *format))
+	while (*conversions && !ft_strchr(SPECI, *conversions))
 	{
-		argpart->conversions[i] = *format;
-		format++;
+		argpart->conversions[i] = *conversions;
+		conversions++;
 		i++;
 	}
-	argpart->conversions[i] = *format;
+	argpart->conversions[i] = *conversions;
 	argpart->conversions[i + 1] = '\0';
 }
 
-void	parse_flags(cv_table *argpart, const char *format)
+void	parse_flags(cv_table *argpart, const char *conversions)
 {
 	int i;
 	int y;
@@ -53,42 +53,42 @@ void	parse_flags(cv_table *argpart, const char *format)
 	argpart->flags[i] = '\0';
 }
 
-int		parse_zeroflag(cv_table *argpart, const char *format)
+int		parse_zeroflag(cv_table *argpart, const char *conversions)
 {
 	int i;
 
 	i = 0;
-	while (format[i])
+	while (conversions[i])
 	{
-		if (format[i] == '0')
+		if (conversions[i] == '0')
 			return (1);
-		else if (ft_strchr("123456789", format[i]))
+		else if (ft_strchr("123456789", conversions[i]))
 			return (0);
 		i++;
 	}
 	return (0);
 }
 
-int		parse_lengths(cv_table *argpart, const char *format)
+int		parse_lengths(cv_table *argpart, const char *conversions)
 {
 	char *pt;
 
 	pt = 0;
-	if ((pt = ft_strchr(format, 'h')))
+	if ((pt = ft_strchr(conversions, 'h')))
 	{
 		if (*(pt + 1) == 'h')
 			argpart->lengths = 1;
 		else
 			argpart->lengths = 2;
 	}
-	else if (((pt = ft_strchr(format, 'l'))))
+	else if (((pt = ft_strchr(conversions, 'l'))))
 	{
 		if (*(pt + 1) == 'l')
 			argpart->lengths = 4;
 		else
 			argpart->lengths = 3;
 	}
-	else if (((pt = ft_strchr(format, 'L'))))
+	else if (((pt = ft_strchr(conversions, 'L'))))
 		argpart->lengths = 5;
 	else
 		argpart->lengths = 0;
@@ -99,19 +99,20 @@ int		parse_lengths(cv_table *argpart, const char *format)
 int		parse(cv_table *argpart, const char *format)
 {
 	parse_conversions(argpart, format);
+	// printf("conv = |%s|\n", argpart->conversions);
 	char *specifier;
 
 	specifier = (ft_search(SPECI, argpart->conversions));
 	if (specifier)
 		argpart->specifier = *specifier;
 
-	parse_flags(argpart, format);
-	argpart->zero_flag = parse_zeroflag(argpart, format);
-	argpart->width = ft_atoi_skip(format);
+	parse_flags(argpart, argpart->conversions);
+	argpart->zero_flag = parse_zeroflag(argpart, argpart->conversions);
+	argpart->width = ft_atoi_skip(argpart->conversions);
 
-	if (ft_strchr(format, '.'))
-		argpart->precision = ft_atoi_skip(ft_strchr(format, '.') + 1);
+	if (ft_strchr(argpart->conversions, '.'))
+		argpart->precision = ft_atoi_skip(ft_strchr(argpart->conversions, '.') + 1);
 
-	parse_lengths(argpart, format);
+	parse_lengths(argpart, argpart->conversions);
 	return (ft_strlen(argpart->conversions));
 }
