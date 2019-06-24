@@ -99,5 +99,6 @@ void				ft_lstadd(t_list **alst, t_list *newlst);
 void				ft_lstiter(t_list *lst, void (*f)(t_list*elem));
 t_list				*ft_lstmap(t_list *lst, t_list *(*f)(t_list	*elem));
 void				ft_deln(void *d, size_t n);
+void				ft_putnchar(int c, int len);
 
 #endif
