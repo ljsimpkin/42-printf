@@ -17,4 +17,4 @@ Run `make`
 This will build the `libftprintf.a` library
 Then include the `ft_printf.h` header in your project and compile with the library
 
-For more information the brief can be downloaded here: [printf.pdf] (https://github.com/EDalSanto/42/raw/master/ft_printf/ft_printf.en.pdf)
+For more information the brief can be downloaded here: [printf.pdf] (https://github.com/EDalSanto/42/raw/master/ft_printf/ft_printf.en.pdf) [printf.pdf](https://github.com/EDalSanto/42/raw/master/ft_printf/ft_printf.en.pdf)
